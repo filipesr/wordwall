@@ -1,8 +1,17 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocalScore } from '../hooks/useLocalScore';
+import { useOnlineScore } from '../hooks/useOnlineScore';
+
+type TabType = 'global' | 'local';
 
 export function RankingPage() {
-  const { scores, clearScores } = useLocalScore();
+  const [activeTab, setActiveTab] = useState<TabType>('global');
+  const { scores: localScores, clearScores } = useLocalScore();
+  const { scores: onlineScores, loading, error, isOnlineMode } = useOnlineScore();
+
+  const scores = activeTab === 'global' ? onlineScores : localScores;
+  const showTabs = isOnlineMode;
 
   return (
     <div className="min-h-screen bg-creme flex flex-col items-center p-4">
@@ -14,15 +23,59 @@ export function RankingPage() {
           ← Voltar
         </Link>
 
-        <h1 className="text-4xl md:text-5xl font-bold text-marrom text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-bold text-marrom text-center mb-4">
           Placar
         </h1>
+
+        {/* Tabs */}
+        {showTabs && (
+          <div className="flex justify-center gap-2 mb-6">
+            <button
+              onClick={() => setActiveTab('global')}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${
+                activeTab === 'global'
+                  ? 'bg-roxo-uva text-white'
+                  : 'bg-white text-marrom hover:bg-gray-100'
+              }`}
+            >
+              Global
+            </button>
+            <button
+              onClick={() => setActiveTab('local')}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${
+                activeTab === 'local'
+                  ? 'bg-roxo-uva text-white'
+                  : 'bg-white text-marrom hover:bg-gray-100'
+              }`}
+            >
+              Meu Dispositivo
+            </button>
+          </div>
+        )}
+
+        {/* Status indicator */}
+        {activeTab === 'global' && (
+          <div className="text-center mb-4">
+            {loading ? (
+              <span className="text-marrom/60 text-sm">Carregando...</span>
+            ) : error ? (
+              <span className="text-rosa-chiclete text-sm">{error}</span>
+            ) : isOnlineMode ? (
+              <span className="text-verde-menta text-sm flex items-center justify-center gap-1">
+                <span className="w-2 h-2 bg-verde-menta rounded-full animate-pulse"></span>
+                Placar em tempo real
+              </span>
+            ) : (
+              <span className="text-marrom/60 text-sm">Modo offline - mostrando placar local</span>
+            )}
+          </div>
+        )}
 
         {scores.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-lg p-8 text-center">
             <span className="text-6xl block mb-4">🏆</span>
             <p className="text-marrom text-lg">
-              Nenhuma pontuacao ainda!
+              {activeTab === 'global' && loading ? 'Carregando...' : 'Nenhuma pontuacao ainda!'}
             </p>
             <p className="text-marrom/60 mt-2">
               Jogue para aparecer no placar.
@@ -102,18 +155,20 @@ export function RankingPage() {
               </table>
             </div>
 
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => {
-                  if (confirm('Tem certeza que deseja limpar o placar?')) {
-                    clearScores();
-                  }
-                }}
-                className="text-rosa-chiclete hover:text-rosa-chiclete/70 font-semibold underline"
-              >
-                Limpar Placar
-              </button>
-            </div>
+            {activeTab === 'local' && (
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => {
+                    if (confirm('Tem certeza que deseja limpar o placar local?')) {
+                      clearScores();
+                    }
+                  }}
+                  className="text-rosa-chiclete hover:text-rosa-chiclete/70 font-semibold underline"
+                >
+                  Limpar Placar Local
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

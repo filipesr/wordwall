@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { type Category, categories } from '../data/words';
 import { useGame } from '../hooks/useGame';
 import { useLocalScore } from '../hooks/useLocalScore';
+import { useOnlineScore } from '../hooks/useOnlineScore';
 import { HangmanDrawing } from '../components/HangmanDrawing';
 import { WordDisplay } from '../components/WordDisplay';
 import { Keyboard } from '../components/Keyboard';
@@ -12,7 +13,9 @@ export function GamePage() {
   const navigate = useNavigate();
   const [playerName, setPlayerName] = useState('');
   const [scoreSaved, setScoreSaved] = useState(false);
-  const { addScore } = useLocalScore();
+  const [saving, setSaving] = useState(false);
+  const { addScore: addLocalScore } = useLocalScore();
+  const { addScore: addOnlineScore } = useOnlineScore();
 
   const validCategory = categories.find((c) => c.id === category);
 
@@ -52,10 +55,20 @@ export function GamePage() {
     );
   }
 
-  const handleSaveScore = () => {
-    if (playerName.trim() && score > 0) {
-      addScore(playerName.trim(), score, validCategory.name);
+  const handleSaveScore = async () => {
+    if (playerName.trim() && score > 0 && !saving) {
+      setSaving(true);
+      const name = playerName.trim();
+      const categoryName = validCategory.name;
+
+      // Save locally (always works)
+      addLocalScore(name, score, categoryName);
+
+      // Try to save online (may fail if offline)
+      await addOnlineScore(name, score, categoryName);
+
       setScoreSaved(true);
+      setSaving(false);
     }
   };
 
@@ -122,10 +135,10 @@ export function GamePage() {
                     />
                     <button
                       onClick={handleSaveScore}
-                      disabled={!playerName.trim()}
+                      disabled={!playerName.trim() || saving}
                       className="mt-3 w-full bg-verde-menta hover:bg-verde-menta/80 disabled:bg-gray-300 text-white font-bold py-3 rounded-xl transition-colors"
                     >
-                      Salvar Pontuacao
+                      {saving ? 'Salvando...' : 'Salvar Pontuacao'}
                     </button>
                   </div>
                 ) : (

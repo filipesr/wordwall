@@ -54,13 +54,21 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Play button */}
-        <Link
-          to="/categorias"
-          className="inline-block bg-rosa-chiclete hover:bg-rosa-chiclete/80 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
-        >
-          Jogar!
-        </Link>
+        {/* Play buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            to="/categorias"
+            className="inline-block bg-rosa-chiclete hover:bg-rosa-chiclete/80 text-white text-xl sm:text-2xl font-bold py-4 px-8 sm:px-12 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+          >
+            Jogar Solo
+          </Link>
+          <Link
+            to="/multiplayer"
+            className="inline-block bg-azul-ceu hover:bg-azul-ceu/80 text-white text-xl sm:text-2xl font-bold py-4 px-8 sm:px-12 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+          >
+            Jogar em Dupla
+          </Link>
+        </div>
 
         {/* Ranking link */}
         <div className="mt-6">
