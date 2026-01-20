@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-amarelo-sol: #FFD93D;
+  --color-rosa-chiclete: #FF6B9D;
+  --color-azul-ceu: #6BC5F8;
+  --color-verde-menta: #6BCB77;
+  --color-roxo-uva: #9B72AA;
+  --color-laranja: #FF9F45;
+  --color-creme: #FFF8E7;
+  --color-marrom: #5D4E37;
+
+  --font-family-display: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, system-ui;
+
+  --animate-bounce-in: bounce-in 0.4s ease-out;
+  --animate-draw-in: draw-in 0.3s ease-out forwards;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes draw-in {
+  from {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+}
+
+body {
+  font-family: var(--font-family-display);
+  background-color: var(--color-creme);
+  color: var(--color-marrom);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
+}

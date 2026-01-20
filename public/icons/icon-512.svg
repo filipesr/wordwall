@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#FFD93D" rx="80"/>
+  <g transform="translate(80, 60)">
+    <!-- Base -->
+    <line x1="30" y1="380" x2="180" y2="380" stroke="#5D4E37" stroke-width="14" stroke-linecap="round"/>
+    <!-- Pole -->
+    <line x1="105" y1="380" x2="105" y2="60" stroke="#5D4E37" stroke-width="14" stroke-linecap="round"/>
+    <!-- Top -->
+    <line x1="105" y1="60" x2="270" y2="60" stroke="#5D4E37" stroke-width="14" stroke-linecap="round"/>
+    <!-- Rope -->
+    <line x1="270" y1="60" x2="270" y2="110" stroke="#5D4E37" stroke-width="10" stroke-linecap="round"/>
+    <!-- Head -->
+    <circle cx="270" cy="165" r="55" fill="#FFF8E7" stroke="#5D4E37" stroke-width="10"/>
+    <!-- Eyes -->
+    <circle cx="250" cy="155" r="8" fill="#5D4E37"/>
+    <circle cx="290" cy="155" r="8" fill="#5D4E37"/>
+    <!-- Smile -->
+    <path d="M 242 185 Q 270 215 298 185" stroke="#5D4E37" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <!-- Body -->
+    <line x1="270" y1="220" x2="270" y2="310" stroke="#6BC5F8" stroke-width="14" stroke-linecap="round"/>
+    <!-- Arms -->
+    <line x1="270" y1="250" x2="220" y2="290" stroke="#6BC5F8" stroke-width="12" stroke-linecap="round"/>
+    <line x1="270" y1="250" x2="320" y2="290" stroke="#6BC5F8" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>
