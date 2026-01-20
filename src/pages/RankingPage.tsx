@@ -57,7 +57,7 @@ export function RankingPage() {
         {activeTab === 'global' && (
           <div className="text-center mb-4">
             {loading ? (
-              <span className="text-marrom/60 text-sm">Carregando...</span>
+              <span className="text-marrom-light text-sm">Carregando...</span>
             ) : error ? (
               <span className="text-rosa-chiclete text-sm">{error}</span>
             ) : isOnlineMode ? (
@@ -66,7 +66,7 @@ export function RankingPage() {
                 Placar em tempo real
               </span>
             ) : (
-              <span className="text-marrom/60 text-sm">Modo offline - mostrando placar local</span>
+              <span className="text-marrom-light text-sm">Modo offline - mostrando placar local</span>
             )}
           </div>
         )}
@@ -77,7 +77,7 @@ export function RankingPage() {
             <p className="text-marrom text-lg">
               {activeTab === 'global' && loading ? 'Carregando...' : 'Nenhuma pontuacao ainda!'}
             </p>
-            <p className="text-marrom/60 mt-2">
+            <p className="text-marrom-light mt-2">
               Jogue para aparecer no placar.
             </p>
             <Link
@@ -108,7 +108,7 @@ export function RankingPage() {
                       </span>
                       <div>
                         <p className="text-marrom font-bold text-lg">{entry.name}</p>
-                        <p className="text-marrom/60 text-sm">{entry.category}</p>
+                        <p className="text-marrom-light text-sm">{entry.category}</p>
                       </div>
                     </div>
                     <div className="text-verde-menta font-bold text-xl">
@@ -145,7 +145,7 @@ export function RankingPage() {
                         {index > 2 && <span className="text-marrom font-semibold">{index + 1}</span>}
                       </td>
                       <td className="py-4 px-4 text-marrom font-semibold">{entry.name}</td>
-                      <td className="py-4 px-4 text-center text-marrom/70">{entry.category}</td>
+                      <td className="py-4 px-4 text-center text-marrom-light">{entry.category}</td>
                       <td className="py-4 px-4 text-right text-verde-menta font-bold text-lg">
                         {entry.score}
                       </td>

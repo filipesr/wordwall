@@ -29,7 +29,7 @@ export const OpponentProgress = memo(function OpponentProgress({
             </span>
           )}
         </div>
-        <div className="text-sm text-marrom/60">
+        <div className="text-sm text-marrom-light">
           Erros: <span className={errors >= maxErrors - 1 ? 'text-rosa-chiclete font-bold' : ''}>{errors}/{maxErrors}</span>
         </div>
       </div>

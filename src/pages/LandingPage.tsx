@@ -37,19 +37,19 @@ export function LandingPage() {
             <div className="flex flex-col items-center text-center p-4 bg-amarelo-sol/20 rounded-2xl">
               <span className="text-4xl mb-3">1️⃣</span>
               <h3 className="font-bold text-lg text-marrom mb-2">Escolha uma Categoria</h3>
-              <p className="text-marrom/70">Animais, frutas, cores ou objetos!</p>
+              <p className="text-marrom-light">Animais, frutas, cores ou objetos!</p>
             </div>
 
             <div className="flex flex-col items-center text-center p-4 bg-azul-ceu/20 rounded-2xl">
               <span className="text-4xl mb-3">2️⃣</span>
               <h3 className="font-bold text-lg text-marrom mb-2">Adivinhe as Letras</h3>
-              <p className="text-marrom/70">Clique nas letras para descobrir a palavra secreta!</p>
+              <p className="text-marrom-light">Clique nas letras para descobrir a palavra secreta!</p>
             </div>
 
             <div className="flex flex-col items-center text-center p-4 bg-verde-menta/20 rounded-2xl">
               <span className="text-4xl mb-3">3️⃣</span>
               <h3 className="font-bold text-lg text-marrom mb-2">Cuidado com os Erros!</h3>
-              <p className="text-marrom/70">Voce tem 6 chances. Nao deixe o boneco completar!</p>
+              <p className="text-marrom-light">Voce tem 6 chances. Nao deixe o boneco completar!</p>
             </div>
           </div>
         </div>

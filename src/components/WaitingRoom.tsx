@@ -59,13 +59,13 @@ export const WaitingRoom = memo(function WaitingRoom({
         <h2 className="text-2xl font-bold text-marrom mb-2">
           Aguardando Jogador
         </h2>
-        <p className="text-marrom/60 mb-6">
+        <p className="text-marrom-light mb-6">
           Compartilhe o código com seu amigo
         </p>
 
         {/* Room Code */}
         <div className="bg-amarelo-sol/20 rounded-2xl p-6 mb-6">
-          <p className="text-sm text-marrom/60 mb-2">Código da Sala</p>
+          <p className="text-sm text-marrom-light mb-2">Código da Sala</p>
           <p className="text-4xl font-mono font-bold text-marrom tracking-widest">
             {code}
           </p>
@@ -98,7 +98,7 @@ export const WaitingRoom = memo(function WaitingRoom({
           {categoryInfo && (
             <div className="flex items-center gap-2">
               <span className="text-xl">{categoryInfo.emoji}</span>
-              <span className="text-marrom/70">{categoryInfo.name}</span>
+              <span className="text-marrom-light">{categoryInfo.name}</span>
             </div>
           )}
         </div>

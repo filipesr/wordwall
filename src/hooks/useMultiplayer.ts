@@ -6,6 +6,7 @@ import { getRandomWord, type Category } from '../data/words';
 
 const MAX_ERRORS = 6;
 const STORAGE_KEY = 'hangman_player_id';
+const ROOM_KEY = 'hangman_room_id';
 
 export function useMultiplayer() {
   const [room, setRoom] = useState<GameRoom | null>(null);
@@ -15,6 +16,7 @@ export function useMultiplayer() {
   const [playerName, setPlayerName] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
   const channelRef = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null);
 
   const isHost = room?.host_id === playerId;
@@ -22,13 +24,47 @@ export function useMultiplayer() {
     ? (myState?.guessed_letters.length || 0) <= (opponentState?.guessed_letters.length || 0)
     : true;
 
-  // Load or create player ID
+  // Load player ID and restore room from storage
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setPlayerId(stored);
+    const storedPlayerId = localStorage.getItem(STORAGE_KEY);
+    const storedRoomId = sessionStorage.getItem(ROOM_KEY);
+
+    if (storedPlayerId) {
+      setPlayerId(storedPlayerId);
+    }
+
+    // Restore room if we have both player and room IDs
+    if (storedPlayerId && storedRoomId && supabase) {
+      (async () => {
+        try {
+          const { data } = await supabase
+            .from('game_rooms')
+            .select()
+            .eq('id', storedRoomId)
+            .single();
+
+          if (data && data.status !== 'finished') {
+            setRoom(data);
+          } else {
+            sessionStorage.removeItem(ROOM_KEY);
+          }
+        } catch {
+          sessionStorage.removeItem(ROOM_KEY);
+        } finally {
+          setInitialized(true);
+        }
+      })();
+    } else {
+      setInitialized(true);
     }
   }, []);
+
+  // Save room ID to session storage when it changes
+  useEffect(() => {
+    if (room?.id) {
+      sessionStorage.setItem(ROOM_KEY, room.id);
+    }
+  }, [room?.id]);
 
   // Create player in database
   const createPlayer = useCallback(async (name: string): Promise<string | null> => {
@@ -377,6 +413,7 @@ export function useMultiplayer() {
     if (channelRef.current && supabase) {
       supabase.removeChannel(channelRef.current);
     }
+    sessionStorage.removeItem(ROOM_KEY);
     setRoom(null);
     setMyState(null);
     setOpponentState(null);
@@ -393,6 +430,7 @@ export function useMultiplayer() {
     isMyTurn,
     loading,
     error,
+    initialized,
     createRoom,
     joinRoom,
     setWord,

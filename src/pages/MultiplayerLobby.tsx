@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMultiplayer } from '../hooks/useMultiplayer';
 import { categories, type Category } from '../data/words';
@@ -20,10 +20,29 @@ export function MultiplayerLobby() {
     room,
     loading,
     error,
+    initialized,
     createRoom,
     joinRoom,
     leaveRoom,
   } = useMultiplayer();
+
+  // Handle room state changes
+  useEffect(() => {
+    if (!initialized || !room) return;
+
+    if (room.status === 'playing') {
+      // Room started, navigate to game
+      navigate('/multiplayer/game');
+    } else if (room.status === 'waiting' && step !== 'waiting') {
+      // Room restored from session, show waiting room
+      setCreatedCode(room.code);
+      setSelectedMode(room.mode);
+      if (room.category) {
+        setSelectedCategory(room.category as Category);
+      }
+      setStep('waiting');
+    }
+  }, [initialized, room, step, navigate]);
 
   const handleCreateRoom = async () => {
     if (!name.trim()) return;
@@ -48,10 +67,17 @@ export function MultiplayerLobby() {
     setCreatedCode(null);
   };
 
-  // If room is playing, redirect to game
-  if (room?.status === 'playing') {
-    navigate('/multiplayer/game');
-    return null;
+  // Loading state while restoring session
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-creme flex items-center justify-center">
+        <div className="flex gap-2">
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+      </div>
+    );
   }
 
   // Waiting room
@@ -141,7 +167,7 @@ export function MultiplayerLobby() {
                   >
                     <span className="text-2xl mr-2">{GAME_MODE_LABELS[mode].emoji}</span>
                     <span className="font-bold">{GAME_MODE_LABELS[mode].name}</span>
-                    <p className={`text-sm mt-1 ${selectedMode === mode ? 'text-white/80' : 'text-marrom/60'}`}>
+                    <p className={`text-sm mt-1 ${selectedMode === mode ? 'text-white/90' : 'text-marrom-light'}`}>
                       {GAME_MODE_LABELS[mode].description}
                     </p>
                   </button>

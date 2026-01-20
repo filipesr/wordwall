@@ -21,17 +21,31 @@ export function MultiplayerGame() {
     opponentState,
     isHost,
     isMyTurn,
+    initialized,
     guess,
     setWord,
     leaveRoom,
   } = useMultiplayer();
 
-  // Redirect if no room
+  // Redirect if no room (only after initialization is complete)
   useEffect(() => {
-    if (!room) {
+    if (initialized && !room) {
       navigate('/multiplayer');
     }
-  }, [room, navigate]);
+  }, [initialized, room, navigate]);
+
+  // Show loading while restoring room from session
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-creme flex items-center justify-center">
+        <div className="flex gap-2">
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+      </div>
+    );
+  }
 
   if (!room) {
     return null;
@@ -74,7 +88,7 @@ export function MultiplayerGame() {
           <h2 className="text-2xl font-bold text-marrom mb-2">
             Modo Desafiante
           </h2>
-          <p className="text-marrom/60 mb-6">
+          <p className="text-marrom-light mb-6">
             <span className="font-bold">{room.host_name}</span> está escolhendo a palavra...
           </p>
           <div className="flex justify-center gap-2">
@@ -96,7 +110,7 @@ export function MultiplayerGame() {
             Escolha a Palavra
           </h1>
           <div className="bg-white rounded-3xl shadow-lg p-6 space-y-4">
-            <p className="text-marrom/70 text-center">
+            <p className="text-marrom-light text-center">
               <span className="font-bold">{opponentName}</span> vai tentar adivinhar!
             </p>
 
@@ -225,7 +239,7 @@ export function MultiplayerGame() {
 
         {/* Turn indicator for cooperative mode */}
         {room.mode === 'cooperative' && (
-          <div className={`mt-2 text-center py-2 rounded-xl ${isMyTurn ? 'bg-verde-menta/20 text-verde-menta' : 'bg-gray-200 text-marrom/60'}`}>
+          <div className={`mt-2 text-center py-2 rounded-xl ${isMyTurn ? 'bg-verde-menta/20 text-verde-menta' : 'bg-gray-200 text-marrom-light'}`}>
             {isMyTurn ? '🎮 Sua vez!' : `⏳ Vez de ${opponentName}`}
           </div>
         )}
@@ -247,7 +261,7 @@ export function MultiplayerGame() {
         {room.mode !== 'cooperative' && (
           <div className="text-center mb-2">
             <span className="text-marrom font-bold">{myName}</span>
-            <span className="text-marrom/60 ml-2">
+            <span className="text-marrom-light ml-2">
               Erros: <span className="text-rosa-chiclete">{errors}</span> / {MAX_ERRORS}
             </span>
           </div>
@@ -255,7 +269,7 @@ export function MultiplayerGame() {
 
         {room.mode === 'cooperative' && (
           <div className="text-center mb-2">
-            <span className="text-marrom/60">
+            <span className="text-marrom-light">
               Erros da dupla: <span className="text-rosa-chiclete font-bold">{errors}</span> / {MAX_ERRORS}
             </span>
           </div>
