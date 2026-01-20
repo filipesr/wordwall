@@ -17,6 +17,11 @@ export interface GameRoom {
   mode: GameMode;
   word: string | null;
   category: string | null;
+  // Campos para modo desafiante (cada jogador escolhe palavra para o outro)
+  host_word: string | null;      // Palavra escolhida pelo host (guest adivinha)
+  guest_word: string | null;     // Palavra escolhida pelo guest (host adivinha)
+  host_category: string | null;  // Categoria da palavra do host
+  guest_category: string | null; // Categoria da palavra do guest
   status: RoomStatus;
   winner_id: string | null;
   created_at: string;
@@ -57,7 +62,7 @@ export const GAME_MODE_LABELS: Record<GameMode, { name: string; description: str
   },
   challenger: {
     name: 'Desafiante',
-    description: 'Um escolhe a palavra, outro adivinha',
+    description: 'Cada um escolhe a palavra do outro!',
     emoji: '🎯',
   },
 };

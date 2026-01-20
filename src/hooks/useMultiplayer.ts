@@ -17,12 +17,29 @@ export function useMultiplayer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const channelRef = useRef<ReturnType<NonNullable<typeof supabase>['channel']> | null>(null);
 
   const isHost = room?.host_id === playerId;
   const isMyTurn = room?.mode === 'cooperative'
     ? (myState?.guessed_letters.length || 0) <= (opponentState?.guessed_letters.length || 0)
     : true;
+
+  // Helpers para modo desafiante
+  // Palavra que EU preciso adivinhar (do oponente)
+  const wordToGuess = room?.mode === 'challenger'
+    ? (isHost ? room.guest_word : room.host_word)
+    : room?.word;
+
+  // Categoria da palavra que EU preciso adivinhar
+  const categoryToGuess = room?.mode === 'challenger'
+    ? (isHost ? room.guest_category : room.host_category)
+    : room?.category;
+
+  // Minha palavra (que o oponente precisa adivinhar) - para verificar se ja defini
+  const myWordSet = room?.mode === 'challenger'
+    ? (isHost ? room.host_word : room.guest_word)
+    : null;
 
   // Load player ID and restore room from storage
   useEffect(() => {
@@ -65,6 +82,20 @@ export function useMultiplayer() {
       sessionStorage.setItem(ROOM_KEY, room.id);
     }
   }, [room?.id]);
+
+  // Timer for elapsed game time
+  useEffect(() => {
+    if (room?.status !== 'playing') {
+      setElapsedSeconds(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [room?.status]);
 
   // Create player in database
   const createPlayer = useCallback(async (name: string): Promise<string | null> => {
@@ -194,12 +225,14 @@ export function useMultiplayer() {
       }
 
       // Update room with guest
+      // No modo challenger, nao muda para 'playing' ainda (ambos precisam definir palavras)
+      const newStatus = roomData.mode === 'challenger' ? 'waiting' : 'playing';
       const { data: updatedRoom, error: updateError } = await supabase
         .from('game_rooms')
         .update({
           guest_id: currentPlayerId,
           guest_name: name,
-          status: 'playing',
+          status: newStatus,
         })
         .eq('id', roomData.id)
         .select()
@@ -231,14 +264,27 @@ export function useMultiplayer() {
     }
   }, [playerId, createPlayer]);
 
-  // Set word (for challenger mode)
+  // Set word (for challenger mode - each player sets word for opponent)
   const setWord = useCallback(async (word: string, category: string): Promise<boolean> => {
-    if (!supabase || !room) return false;
+    if (!supabase || !room || !playerId) return false;
 
     try {
+      // No modo desafiante, cada jogador define a palavra que o outro vai adivinhar
+      const updateData: Record<string, string> = isHost
+        ? { host_word: word.toUpperCase(), host_category: category }
+        : { guest_word: word.toUpperCase(), guest_category: category };
+
+      // Verificar se o outro jogador ja definiu a palavra
+      const opponentWordSet = isHost ? room.guest_word : room.host_word;
+
+      // Se ambos definiram, iniciar o jogo
+      if (opponentWordSet) {
+        Object.assign(updateData, { status: 'playing' });
+      }
+
       const { error: updateError } = await supabase
         .from('game_rooms')
-        .update({ word: word.toUpperCase(), category, status: 'playing' })
+        .update(updateData)
         .eq('id', room.id);
 
       if (updateError) throw updateError;
@@ -247,7 +293,7 @@ export function useMultiplayer() {
       console.error('Error setting word:', err);
       return false;
     }
-  }, [room]);
+  }, [room, playerId, isHost]);
 
   // Make a guess
   const guess = useCallback(async (letter: string): Promise<void> => {
@@ -260,12 +306,18 @@ export function useMultiplayer() {
     // In cooperative mode, check if it's my turn
     if (room.mode === 'cooperative' && !isMyTurn) return;
 
+    // Determinar qual palavra eu estou adivinhando
+    // No modo desafiante: host adivinha guest_word, guest adivinha host_word
+    const wordToGuess = room.mode === 'challenger'
+      ? (isHost ? room.guest_word : room.host_word)
+      : room.word;
+
     const newGuessedLetters = [...myState.guessed_letters, upperLetter];
-    const isCorrect = room.word?.includes(upperLetter);
+    const isCorrect = wordToGuess?.includes(upperLetter);
     const newErrors = isCorrect ? myState.errors : myState.errors + 1;
 
     // Check win/loss
-    const wordLetters = new Set(room.word?.split('') || []);
+    const wordLetters = new Set(wordToGuess?.split('') || []);
     const guessedSet = new Set(newGuessedLetters);
     const allLettersGuessed = [...wordLetters].every(l => guessedSet.has(l));
     const isLost = newErrors >= MAX_ERRORS;
@@ -300,7 +352,8 @@ export function useMultiplayer() {
 
       // Update room status if game ended
       if (isWon || isLost) {
-        const winnerId = isWon ? (room.mode === 'competitive' ? playerId : null) : null;
+        // No modo competitivo e desafiante, quem acerta primeiro vence
+        const winnerId = isWon ? (room.mode === 'cooperative' ? null : playerId) : null;
         await supabase
           .from('game_rooms')
           .update({
@@ -431,6 +484,10 @@ export function useMultiplayer() {
     loading,
     error,
     initialized,
+    elapsedSeconds,
+    wordToGuess,
+    categoryToGuess,
+    myWordSet,
     createRoom,
     joinRoom,
     setWord,

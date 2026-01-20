@@ -22,10 +22,20 @@ export function MultiplayerGame() {
     isHost,
     isMyTurn,
     initialized,
+    elapsedSeconds,
+    wordToGuess,
+    categoryToGuess,
+    myWordSet,
     guess,
     setWord,
     leaveRoom,
   } = useMultiplayer();
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Redirect if no room (only after initialization is complete)
   useEffect(() => {
@@ -51,7 +61,8 @@ export function MultiplayerGame() {
     return null;
   }
 
-  const word = room.word || '';
+  // No modo desafiante, uso wordToGuess (palavra do oponente que eu adivinho)
+  const word = room.mode === 'challenger' ? (wordToGuess || '') : (room.word || '');
   const guessedLetters = new Set(myState?.guessed_letters || []);
   const correctLetters = new Set(
     [...guessedLetters].filter(l => word.includes(l))
@@ -60,14 +71,20 @@ export function MultiplayerGame() {
 
   const opponentName = isHost ? room.guest_name : room.host_name;
   const myName = isHost ? room.host_name : room.guest_name;
-  const categoryInfo = categories.find(c => c.name === room.category);
+
+  // Categoria para exibir (no modo desafiante, e a categoria da palavra que estou adivinhando)
+  const displayCategory = room.mode === 'challenger' ? categoryToGuess : room.category;
+  const categoryInfo = categories.find(c => c.name === displayCategory);
 
   const isGameOver = room.status === 'finished' || myState?.finished;
   const iWon = myState?.won;
   const opponentWon = opponentState?.won;
 
-  // Challenger mode: host needs to set word
-  const needsToSetWord = room.mode === 'challenger' && isHost && !room.word;
+  // Challenger mode: verificar se EU preciso definir minha palavra (para o oponente adivinhar)
+  const needsToSetWord = room.mode === 'challenger' && !myWordSet && room.guest_id;
+
+  // Challenger mode: verificar se estou aguardando o oponente definir a palavra dele
+  const waitingForOpponentWord = room.mode === 'challenger' && myWordSet && !wordToGuess;
 
   const handleSetWord = async () => {
     if (customWord.trim().length < 3) return;
@@ -76,11 +93,11 @@ export function MultiplayerGame() {
 
   const handleLeave = () => {
     leaveRoom();
-    navigate('/multiplayer');
+    navigate('/');
   };
 
-  // Challenger mode: waiting for host to set word (guest view)
-  if (room.mode === 'challenger' && !room.word && !isHost) {
+  // Challenger mode: aguardando o outro jogador entrar
+  if (room.mode === 'challenger' && !room.guest_id) {
     return (
       <div className="min-h-screen bg-creme flex flex-col items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-lg p-8 text-center">
@@ -89,19 +106,25 @@ export function MultiplayerGame() {
             Modo Desafiante
           </h2>
           <p className="text-marrom-light mb-6">
-            <span className="font-bold">{room.host_name}</span> está escolhendo a palavra...
+            Aguardando outro jogador entrar...
           </p>
           <div className="flex justify-center gap-2">
             <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
             <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
             <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
+          <button
+            onClick={handleLeave}
+            className="mt-6 text-rosa-chiclete hover:text-rosa-chiclete/70 font-semibold underline"
+          >
+            Cancelar
+          </button>
         </div>
       </div>
     );
   }
 
-  // Challenger mode: host sets the word
+  // Challenger mode: eu preciso definir minha palavra (para o oponente adivinhar)
   if (needsToSetWord) {
     return (
       <div className="min-h-screen bg-creme flex flex-col items-center p-4">
@@ -143,9 +166,37 @@ export function MultiplayerGame() {
               disabled={customWord.trim().length < 3}
               className="w-full bg-verde-menta hover:bg-verde-menta/80 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl text-xl transition-all"
             >
-              Começar Jogo
+              Confirmar Palavra
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Challenger mode: aguardando oponente definir a palavra dele
+  if (waitingForOpponentWord) {
+    return (
+      <div className="min-h-screen bg-creme flex flex-col items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-lg p-8 text-center">
+          <div className="text-6xl mb-4">✅</div>
+          <h2 className="text-2xl font-bold text-marrom mb-2">
+            Palavra Definida!
+          </h2>
+          <p className="text-marrom-light mb-6">
+            Aguardando <span className="font-bold">{opponentName}</span> escolher a palavra...
+          </p>
+          <div className="flex justify-center gap-2">
+            <div className="w-3 h-3 bg-verde-menta rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-3 h-3 bg-verde-menta rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-3 h-3 bg-verde-menta rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          </div>
+          <button
+            onClick={handleLeave}
+            className="mt-6 text-rosa-chiclete hover:text-rosa-chiclete/70 font-semibold underline"
+          >
+            Sair
+          </button>
         </div>
       </div>
     );
@@ -217,10 +268,25 @@ export function MultiplayerGame() {
       {/* Header */}
       <div className="w-full max-w-2xl mb-4">
         <div className="flex justify-between items-center">
+          <button
+            onClick={handleLeave}
+            className="text-rosa-chiclete hover:text-rosa-chiclete/70 font-semibold text-sm"
+          >
+            ← Sair
+          </button>
           <div className="flex items-center gap-2">
             <span className="text-xl">{GAME_MODE_LABELS[room.mode].emoji}</span>
             <span className="text-marrom font-bold">{GAME_MODE_LABELS[room.mode].name}</span>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="bg-white/80 px-3 py-1 rounded-full">
+              <span className="font-mono font-bold text-marrom">{formatTime(elapsedSeconds)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Category badge */}
+        <div className="flex justify-center mt-2">
           {categoryInfo && (
             <div className={`${categoryInfo.color} px-3 py-1 rounded-full`}>
               <span className="text-white font-bold text-sm">
@@ -228,10 +294,10 @@ export function MultiplayerGame() {
               </span>
             </div>
           )}
-          {room.category && !categoryInfo && (
+          {displayCategory && !categoryInfo && (
             <div className="bg-roxo-uva px-3 py-1 rounded-full">
               <span className="text-white font-bold text-sm">
-                {room.category}
+                {displayCategory}
               </span>
             </div>
           )}
@@ -245,8 +311,8 @@ export function MultiplayerGame() {
         )}
       </div>
 
-      {/* Opponent progress (for competitive mode) */}
-      {room.mode === 'competitive' && opponentName && (
+      {/* Opponent progress (for competitive and challenger modes) */}
+      {(room.mode === 'competitive' || room.mode === 'challenger') && opponentName && (
         <div className="w-full max-w-2xl mb-4">
           <OpponentProgress
             state={opponentState}

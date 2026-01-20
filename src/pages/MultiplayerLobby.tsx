@@ -33,6 +33,9 @@ export function MultiplayerLobby() {
     if (room.status === 'playing') {
       // Room started, navigate to game
       navigate('/multiplayer/game');
+    } else if (room.mode === 'challenger' && room.guest_id) {
+      // Challenger mode: navigate when guest joins (both players need to set words)
+      navigate('/multiplayer/game');
     } else if (room.status === 'waiting' && step !== 'waiting') {
       // Room restored from session, show waiting room
       setCreatedCode(room.code);
