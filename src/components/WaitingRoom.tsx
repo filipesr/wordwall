@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { GAME_MODE_LABELS, type GameMode } from '../types/multiplayer';
 import { categories, type Category } from '../data/words';
+import { AdBanner } from './AdBanner';
 
 interface WaitingRoomProps {
   code: string;
@@ -108,6 +109,11 @@ export const WaitingRoom = memo(function WaitingRoom({
           <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
           <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
           <div className="w-3 h-3 bg-rosa-chiclete rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+
+        {/* Banner de anúncio */}
+        <div className="mb-6">
+          <AdBanner slot="5551302357" format="rectangle" />
         </div>
 
         <button

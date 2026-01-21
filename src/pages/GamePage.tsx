@@ -7,6 +7,7 @@ import { useOnlineScore } from '../hooks/useOnlineScore';
 import { HangmanDrawing } from '../components/HangmanDrawing';
 import { WordDisplay } from '../components/WordDisplay';
 import { Keyboard } from '../components/Keyboard';
+import { AdBanner } from '../components/AdBanner';
 
 export function GamePage() {
   const { category } = useParams<{ category: Category }>();
@@ -153,6 +154,11 @@ export function GamePage() {
                 <p className="text-2xl font-bold text-marrom mb-4">{word}</p>
               </>
             )}
+
+            {/* Banner de anúncio */}
+            <div className="mb-4">
+              <AdBanner slot="1719513331" format="rectangle" />
+            </div>
 
             <div className="flex gap-3">
               <button

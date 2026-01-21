@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLocalScore } from '../hooks/useLocalScore';
 import { useOnlineScore } from '../hooks/useOnlineScore';
+import { AdBanner } from '../components/AdBanner';
 
 type TabType = 'global' | 'local';
 
@@ -153,6 +154,11 @@ export function RankingPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Banner de anúncio */}
+            <div className="mt-6">
+              <AdBanner slot="8013814160" format="rectangle" />
             </div>
 
             {activeTab === 'local' && (
