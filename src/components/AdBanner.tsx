@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -15,18 +15,26 @@ interface AdBannerProps {
 export function AdBanner({ slot, format = 'auto', className = '' }: AdBannerProps) {
   const adRef = useRef<HTMLModElement>(null);
   const isAdLoaded = useRef(false);
+  const [adFailed, setAdFailed] = useState(false);
 
   useEffect(() => {
     if (isAdLoaded.current) return;
 
-    try {
-      if (typeof window !== 'undefined' && window.adsbygoogle) {
-        window.adsbygoogle.push({});
-        isAdLoaded.current = true;
+    const loadAd = () => {
+      try {
+        if (typeof window !== 'undefined' && window.adsbygoogle) {
+          window.adsbygoogle.push({});
+          isAdLoaded.current = true;
+        }
+      } catch (error) {
+        console.error('AdSense error:', error);
+        setAdFailed(true);
       }
-    } catch (error) {
-      console.error('AdSense error:', error);
-    }
+    };
+
+    // Pequeno delay para garantir que o script do AdSense carregou
+    const timer = setTimeout(loadAd, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   const getAdStyle = () => {
@@ -42,6 +50,7 @@ export function AdBanner({ slot, format = 'auto', className = '' }: AdBannerProp
 
   const isDev = import.meta.env.DEV;
 
+  // Em desenvolvimento, mostra placeholder
   if (isDev) {
     return (
       <div
@@ -51,6 +60,11 @@ export function AdBanner({ slot, format = 'auto', className = '' }: AdBannerProp
         [Ad Banner - {format}]
       </div>
     );
+  }
+
+  // Se o ad falhou, não mostra nada (não quebra a UI)
+  if (adFailed) {
+    return null;
   }
 
   return (
