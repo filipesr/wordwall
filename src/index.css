@@ -14,7 +14,7 @@
   /* Cores para texto secundário (maior contraste que opacidade) */
   --color-marrom-light: #6B5A45;
 
-  --font-family-display: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, system-ui;
+  --font-family-display: 'Nunito', 'Poppins', 'Segoe UI', system-ui, sans-serif;
 
   --animate-bounce-in: bounce-in 0.4s ease-out;
   --animate-draw-in: draw-in 0.3s ease-out forwards;
